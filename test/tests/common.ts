@@ -1,5 +1,5 @@
-import {assert} from 'chai'
-import {PermissionLevel, SessionKit} from '@wharfkit/session'
+import { assert } from 'chai'
+import { PermissionLevel, SessionKit } from '@wharfkit/session'
 import {
     mockChainDefinition,
     mockPermissionLevel,
@@ -7,14 +7,14 @@ import {
     mockSessionKitOptions,
 } from '@wharfkit/mock-data'
 
-import {WalletPluginTEMPLATE} from '$lib'
+import { WalletPluginWebAuth } from '$lib'
 
 suite('wallet plugin', function () {
     test('login and sign', async function () {
         const kit = new SessionKit(
             {
                 ...mockSessionKitArgs,
-                walletPlugins: [new WalletPluginTEMPLATE()],
+                walletPlugins: [new WalletPluginWebAuth()],
             },
             mockSessionKitOptions
         )

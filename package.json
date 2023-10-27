@@ -23,7 +23,6 @@
         "isomorphic-ws": "^5.0.0",
         "pako": "^2.1.0",
         "tslib": "^2.1.0",
-        "uuid": "^9.0.1",
         "ws": "^8.14.2"
     },
     "peerDependencies": {

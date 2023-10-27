@@ -1,8 +1,8 @@
 import { ReceiveOptions } from '@greymass/buoy'
-import { v4 as uuid } from 'uuid'
 import zlib from 'pako'
 import { ChainId, LinkChain, LinkCreate, SigningRequest } from '@proton/link'
 import { LoginContext, PrivateKey, PublicKey } from '@wharfkit/session'
+import { uuid } from '@wharfkit/protocol-esr'
 
 export interface IdentityRequestResponse {
     callback

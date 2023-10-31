@@ -1,6 +1,12 @@
-import { ReceiveOptions } from '@greymass/buoy'
-import { BuoySession, IdentityRequestResponse, getUserAgent, prepareCallback, uuid } from '@wharfkit/protocol-esr'
-import { LoginContext, PrivateKey, SigningRequest } from '@wharfkit/session'
+import {ReceiveOptions} from '@greymass/buoy'
+import {
+    BuoySession,
+    getUserAgent,
+    IdentityRequestResponse,
+    prepareCallback,
+    uuid,
+} from '@wharfkit/protocol-esr'
+import {LoginContext, PrivateKey, SigningRequest} from '@wharfkit/session'
 
 /**
  * createIdentityRequest
@@ -42,12 +48,12 @@ export async function createIdentityRequest(
             identity: {
                 permission: undefined,
             },
-            broadcast: false
+            broadcast: false,
         },
         context.esrOptions
     )
 
-    request.setInfoKey('req_account', String(context.appName));
+    request.setInfoKey('req_account', String(context.appName))
 
     // Return the request and the callback data
     return {
@@ -57,7 +63,6 @@ export async function createIdentityRequest(
         privateKey,
     }
 }
-
 
 function prepareCallbackChannel(buoyUrl): ReceiveOptions {
     return {

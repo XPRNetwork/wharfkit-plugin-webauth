@@ -1,4 +1,4 @@
-import { send } from '@greymass/buoy'
+import {send} from '@greymass/buoy'
 import {
     AbstractWalletPlugin,
     CallbackPayload,
@@ -12,10 +12,12 @@ import {
     PromptResponse,
     PublicKey,
     ResolvedSigningRequest,
-    Serializer, TransactContext, WalletPluginConfig,
+    Serializer,
+    TransactContext,
+    WalletPluginConfig,
     WalletPluginLoginResponse,
     WalletPluginMetadata,
-    WalletPluginSignResponse
+    WalletPluginSignResponse,
 } from '@wharfkit/session'
 import {
     extractSignaturesFromCallback,
@@ -28,11 +30,11 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import { createIdentityRequest } from './utils'
+import {createIdentityRequest} from './utils'
 
 // import defaultTranslations from './translations'
 
-type ProtonScheme = 'esr' | 'proton' | 'proton-dev';
+type ProtonScheme = 'esr' | 'proton' | 'proton-dev'
 
 interface WalletPluginOptions {
     buoyUrl?: string
@@ -67,8 +69,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         this.buoyUrl = options?.buoyUrl || 'https://cb.anchor.link'
         this.buoyWs = options?.buoyWs
-        if(options?.scheme) {
-            this.scheme = options.scheme;
+        if (options?.scheme) {
+            this.scheme = options.scheme
         }
     }
 
@@ -119,13 +121,13 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
         }
 
         const t = context.ui.getTranslate(this.id)
-        
+
         // Create the identity request to be presented to the user
-        const { callback, request, requestKey, privateKey } = await createIdentityRequest(
+        const {callback, request, requestKey, privateKey} = await createIdentityRequest(
             context,
             this.buoyUrl
         )
-                
+
         // Tell Wharf we need to prompt the user with a QR code and a button
         const promptResponse = context.ui?.prompt({
             title: t('login.title', {default: 'Connect with WebAuth'}),
@@ -251,7 +253,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                         label: t('transact.sign_manually.link.title', {default: 'Open WebAuth'}),
                         data: {
                             href: String(request),
-                            label: t('transact.sign_manually.link.title', {default: 'Open WebAuth'}),
+                            label: t('transact.sign_manually.link.title', {
+                                default: 'Open WebAuth',
+                            }),
                         },
                     },
                 ],

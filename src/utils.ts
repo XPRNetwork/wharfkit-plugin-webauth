@@ -1,31 +1,6 @@
 import { ReceiveOptions } from '@greymass/buoy'
-import zlib from 'pako'
-import { ChainId, LinkChain, LinkCreate, SigningRequest } from '@proton/link'
-import { LoginContext, PrivateKey, PublicKey } from '@wharfkit/session'
-import { uuid } from '@wharfkit/protocol-esr'
-
-export interface IdentityRequestResponse {
-    callback
-    request: SigningRequest
-    requestKey: PublicKey
-    privateKey: PrivateKey
-}
-
-export function getUserAgent(): string {
-    const version = '__ver'
-    let agent = `AnchorLink/${version}`
-    if (typeof navigator !== 'undefined') {
-        agent += ` BrowserTransport/${version} ` + navigator.userAgent
-    }
-    return agent
-}
-
-function prepareCallbackChannel(buoyUrl): ReceiveOptions {
-    return {
-        service: buoyUrl,
-        channel: uuid(),
-    }
-}
+import { BuoySession, IdentityRequestResponse, getUserAgent, prepareCallback, uuid } from '@wharfkit/protocol-esr'
+import { LoginContext, PrivateKey, SigningRequest } from '@wharfkit/session'
 
 /**
  * createIdentityRequest
@@ -41,59 +16,38 @@ export async function createIdentityRequest(
     const privateKey = PrivateKey.generate('K1')
     const requestKey = privateKey.toPublic()
 
-    const createInfo = LinkCreate.from({
+    // Create a new BuoySession struct to be used as the info field
+    const createInfo = BuoySession.from({
         session_name: String(context.appName),
         request_key: requestKey,
         user_agent: getUserAgent(),
     })
-    
+
+    // Determine based on the options whether this is a multichain request
+    const isMultiChain = !(context.chain || context.chains.length === 1)
+
     // Create the callback
     const callbackChannel = prepareCallbackChannel(buoyUrl)
 
-    const isMultiChain = !(context.chain || context.chains.length === 1)
-    let request: SigningRequest;
-    let lchain: LinkChain;
-    if (!isMultiChain) {
-        const c = context.chain || context.chains[0]
-        const a = ChainId.from(c.id as any);
-        lchain = new LinkChain(a, c.url)
-        request = await SigningRequest.create(
-            {
-                identity: {
-                    permission: undefined,
-                },
-                info: {
-                    link: createInfo,
-                    scope: String(context.appName),
-                },
-                chainId: lchain.chainId,
-                broadcast: false,
+    // Create the request
+    const request = SigningRequest.createSync(
+        {
+            callback: prepareCallback(callbackChannel),
+            chainId: isMultiChain ? null : context.chain?.id,
+            chainIds: isMultiChain ? context.chains.map((c) => c.id) : undefined,
+            info: {
+                link: createInfo,
+                scope: String(context.appName),
             },
-            {abiProvider: lchain, zlib, scheme: 'proton-dev'}
-        )
-    } else {
-        // multi-chain request
-        lchain = new LinkChain(ChainId.from(context.chains[0].id as any), context.chains[0].url)
-        request = await SigningRequest.create(
-            {
-                identity: { 
-                    permission: undefined,
-                },
-                info: {
-                    link: createInfo,
-                    scope: String(context.appName),
-                },
-                chainId: null,
-                chainIds: context.chains.map((c) =>  ChainId.from(c.id as any)),
-                broadcast: false,
+            identity: {
+                permission: undefined,
             },
-            // abi's will be pulled from the first chain and assumed to be identical on all chains
-            {abiProvider: lchain, zlib, scheme: 'proton-dev'}
-        )
-    }
-    
+            broadcast: false
+        },
+        context.esrOptions
+    )
+
     request.setInfoKey('req_account', String(context.appName));
-    request.setCallback(`${callbackChannel.service}/${callbackChannel.channel}`, true)
 
     // Return the request and the callback data
     return {
@@ -101,5 +55,13 @@ export async function createIdentityRequest(
         request,
         requestKey,
         privateKey,
+    }
+}
+
+
+function prepareCallbackChannel(buoyUrl): ReceiveOptions {
+    return {
+        service: buoyUrl,
+        channel: uuid(),
     }
 }

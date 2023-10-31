@@ -17,11 +17,8 @@
     },
     "dependencies": {
         "@greymass/buoy": "^1.0.3",
-        "@proton/link": "^4.2.15",
-        "@proton/signing-request": "^4.2.7",
         "@wharfkit/protocol-esr": "^1.0.0-rc1",
         "isomorphic-ws": "^5.0.0",
-        "pako": "^2.1.0",
         "tslib": "^2.1.0",
         "ws": "^8.14.2"
     },

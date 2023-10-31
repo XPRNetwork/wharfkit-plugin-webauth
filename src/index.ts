@@ -32,9 +32,12 @@ import { createIdentityRequest } from './utils'
 
 // import defaultTranslations from './translations'
 
+type ProtonScheme = 'esr' | 'proton' | 'proton-dev';
+
 interface WalletPluginOptions {
     buoyUrl?: string
     buoyWs?: WebSocket
+    scheme?: ProtonScheme
 }
 export class WalletPluginWebAuth extends AbstractWalletPlugin {
     chain: Checksum256 | undefined
@@ -46,6 +49,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
     channelName: string | undefined
     buoyUrl: string
     buoyWs: WebSocket | undefined
+    scheme: ProtonScheme = 'proton'
 
     /**
      * The unique identifier for the wallet plugin.
@@ -63,6 +67,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         this.buoyUrl = options?.buoyUrl || 'https://cb.anchor.link'
         this.buoyWs = options?.buoyWs
+        if(options?.scheme) {
+            this.scheme = options.scheme;
+        }
     }
 
     /**
@@ -129,13 +136,13 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             elements: [
                 {
                     type: 'qr',
-                    data: request.encode(true, false),
+                    data: request.encode(true, false, `${this.scheme}:`),
                 },
                 {
                     type: 'link',
                     label: t('login.link', {default: 'Launch WebAuth'}),
                     data: {
-                        href: request.encode(true, false),
+                        href: request.encode(true, false, `${this.scheme}:`),
                         label: t('login.link', {default: 'Launch WebAuth'}),
                         variant: 'primary',
                     },
@@ -270,7 +277,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     type: 'button',
                     label: t('transact.label', {default: 'Sign manually or with another device'}),
                     data: {
-                        href: modifiedRequest.encode(true, false, 'esr:'),
+                        href: modifiedRequest.encode(true, false, `${this.scheme}:`),
                         onClick: signManually,
                         label: t('transact.label', {
                             default: 'Sign manually or with another device',
@@ -308,7 +315,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
         const service = new URL(this.data.channelUrl).origin
         const channel = new URL(this.data.channelUrl).pathname.substring(1)
         const sealedMessage = sealMessage(
-            modifiedRequest.encode(true, false, 'esr:'),
+            modifiedRequest.encode(true, false, `${this.scheme}:`),
             PrivateKey.from(this.data.privateKey),
             PublicKey.from(this.data.signerKey)
         )

@@ -12,10 +12,12 @@ import {
     PromptResponse,
     PublicKey,
     ResolvedSigningRequest,
-    Serializer, TransactContext, WalletPluginConfig,
+    Serializer,
+    TransactContext,
+    WalletPluginConfig,
     WalletPluginLoginResponse,
     WalletPluginMetadata,
-    WalletPluginSignResponse
+    WalletPluginSignResponse,
 } from '@wharfkit/session'
 import {
     extractSignaturesFromCallback,
@@ -34,7 +36,7 @@ import { inBrowserPayload, isInBrowserPayload } from './types'
 
 import defaultTranslations from './translations'
 
-type ProtonScheme = 'esr' | 'proton' | 'proton-dev';
+type ProtonScheme = 'esr' | 'proton' | 'proton-dev'
 
 interface WalletPluginOptions {
     buoyUrl?: string
@@ -70,8 +72,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         this.buoyUrl = options?.buoyUrl || 'https://cb.anchor.link'
         this.buoyWs = options?.buoyWs
-        if(options?.scheme) {
-            this.scheme = options.scheme;
+        if (options?.scheme) {
+            this.scheme = options.scheme
         }
 
         this.browserTransport = new BrowserTransport({ scheme: this.scheme });
@@ -127,11 +129,11 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
         const browserLogin = new Deferred<inBrowserPayload>();
         
         // Create the identity request to be presented to the user
-        const { callback, request, requestKey, privateKey } = await createIdentityRequest(
+        const {callback, request, requestKey, privateKey} = await createIdentityRequest(
             context,
             this.buoyUrl
         )
-                
+
         // Tell Wharf we need to prompt the user with a QR code and a button
         const promptResponse = context.ui?.prompt({
             title: t('login.title', {default: 'Connect with WebAuth'}),

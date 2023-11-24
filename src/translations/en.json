@@ -1,0 +1,23 @@
+{
+    "login": {
+        "title": "Connect with WebAuth",
+        "body": "Scan with WebAuth on your mobile device or click the button below to open on this device.",
+        "link": "Launch WebAuth",
+        "browser": "Launch browser"
+    },
+    "transact": {
+        "title": "Complete using WebAuth",
+        "body": "Please open your WebAuth Wallet on \"{{channelName}}\" to review and approve this transaction.",
+        "body_browser": "Please complete the transaction using the WebAuth popup window.",
+        "label": "Sign manually or with another device",
+        "link": "Trigger Manually",
+        "await": "Waiting for response from WebAuth"
+    },
+    "error": {
+        "expired": "The request expired, please try again.",
+        "invalid_response": "Invalid response from WebAuth, must contain link_ch, link_key, link_name and cid flags.",
+        "not_completed": "The request was not completed.",
+        "cancelled": "The request was cancelled from WebAuth.",
+        "no_chain": "No chain id provided"
+    }
+}

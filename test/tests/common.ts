@@ -7,16 +7,11 @@ import {
     mockSessionKitOptions,
 } from '@wharfkit/mock-data'
 
-import { WalletPluginWebAuth } from '$lib'
 
 suite('wallet plugin', function () {
     test('login and sign', async function () {
         const kit = new SessionKit(
-            {
-                ...mockSessionKitArgs,
-                walletPlugins: [new WalletPluginWebAuth()],
-            },
-            mockSessionKitOptions
+            mockSessionKitArgs, mockSessionKitOptions
         )
         const {session} = await kit.login({
             chain: mockChainDefinition.id,

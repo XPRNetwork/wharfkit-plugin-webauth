@@ -1,13 +1,6 @@
-// import type { LinkOptions, LinkStorage, LinkTransport, TransactArgs, TransactOptions } from "@proton/link"
-
 import { Deferred } from './utils'
 
 const OPEN_SETTINGS = 'menubar=1,resizable=1,width=400,height=600'
-
-interface Authorization {
-  actor: string,
-  permission: string
-}
 
 function parseErrorMessage(error: any) {
   let errorMessage: string
@@ -61,7 +54,9 @@ export class BrowserTransport {
     this.scheme = options.scheme
 
     setInterval(() => this.closeChild(), 500)
-    window.addEventListener('message', (event) => this.onEvent(event), false)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('message', (event) => this.onEvent(event), false)
+    }
   }
 
   childUrl(path: string) {

@@ -32,7 +32,7 @@ import { Deferred, createIdentityRequest, getChainId } from './utils'
 import { BrowserTransport } from './browser'
 import { inBrowserPayload, isInBrowserPayload } from './types'
 
-// import defaultTranslations from './translations'
+import defaultTranslations from './translations'
 
 type ProtonScheme = 'esr' | 'proton' | 'proton-dev';
 
@@ -63,8 +63,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
     /**
      * The translations for this plugin
      */
-    // translations = defaultTranslations
-    translations = {}
+    translations = defaultTranslations
 
     constructor(options?: WalletPluginOptions) {
         super()
@@ -279,8 +278,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             // Tell Wharf we need to prompt the user with a QR code and a button
             const promptPromise: Cancelable<PromptResponse> = context.ui.prompt({
                 title: t('transact.title', {default: 'Complete using WebAuth'}),
-                body: t('transact.body', {
-                    default: `Please complete the transaction using the WebAuth  popup window.`,
+                body: t('transact.body_browser', {
+                    default: `Please complete the transaction using the WebAuth popup window.`,
                 }),
                 elements: [
                     {

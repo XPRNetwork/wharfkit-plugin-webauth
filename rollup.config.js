@@ -2,6 +2,7 @@ import fs from 'fs'
 import dts from 'rollup-plugin-dts'
 import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json'
 
 import pkg from './package.json'
 
@@ -32,7 +33,7 @@ export default [
         },
         plugins: [typescript({target: 'es6'}), commonjs({
             defaultIsModuleExports: false,
-        }),],
+        }),json()],
         external,
     },
     {
@@ -45,7 +46,7 @@ export default [
         },
         plugins: [typescript({target: 'es2020'}), commonjs({
             defaultIsModuleExports: false,
-        }),],
+        }),json()],
         external,
     },
     {

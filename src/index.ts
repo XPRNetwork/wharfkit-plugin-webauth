@@ -1,4 +1,4 @@
-import { send } from '@greymass/buoy'
+import {send} from '@greymass/buoy'
 import {
     AbstractWalletPlugin,
     CallbackPayload,
@@ -32,9 +32,9 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import { Deferred, createIdentityRequest, getChainId } from './utils'
-import { BrowserTransport } from './browser'
-import { inBrowserPayload, isInBrowserPayload } from './types'
+import {createIdentityRequest, Deferred, getChainId} from './utils'
+import {BrowserTransport} from './browser'
+import {inBrowserPayload, isInBrowserPayload} from './types'
 
 import defaultTranslations from './translations'
 
@@ -57,7 +57,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
     buoyWs: WebSocket | undefined
     scheme: ProtonScheme = 'proton'
 
-    private browserTransport?: BrowserTransport;
+    private browserTransport?: BrowserTransport
 
     /**
      * The unique identifier for the wallet plugin.
@@ -78,7 +78,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             this.scheme = options.scheme
         }
 
-        this.browserTransport = new BrowserTransport({ scheme: this.scheme });
+        this.browserTransport = new BrowserTransport({scheme: this.scheme})
     }
 
     /**
@@ -128,8 +128,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         const t = context.ui.getTranslate(this.id)
 
-        const browserLogin = new Deferred<inBrowserPayload>();
-        
+        const browserLogin = new Deferred<inBrowserPayload>()
+
         // Create the identity request to be presented to the user
         const {callback, request, requestKey, privateKey} = await createIdentityRequest(
             context,
@@ -162,7 +162,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     data: {
                         icon: 'globe',
                         onClick: () => {
-                            this.loginWithBrowser(browserLogin);
+                            this.loginWithBrowser(browserLogin)
                         },
                         label: t('login.browser', {default: 'Launch browser'}),
                         variant: 'primary',
@@ -180,13 +180,13 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         // Await a promise race to wait for either the wallet response or the cancel
         const callbackResponse: CallbackPayload | inBrowserPayload = await Promise.race([
-            waitForCallback(callback, this.buoyWs, t), 
-            browserLogin.promise
+            waitForCallback(callback, this.buoyWs, t),
+            browserLogin.promise,
         ])
 
-        if(isInBrowserPayload(callbackResponse)) {
-            const chainId = getChainId(context);
-            if(!chainId) {
+        if (isInBrowserPayload(callbackResponse)) {
+            const chainId = getChainId(context)
+            if (!chainId) {
                 throw new Error(
                     t('error.no_chain', {
                         default: 'No chain id provided',
@@ -194,8 +194,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 )
             }
 
-            this.data.inBrowser = true;
-            
+            this.data.inBrowser = true
+
             this.data.requestKey = undefined
             this.data.privateKey = undefined
             this.data.signerKey = undefined
@@ -216,7 +216,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             callbackResponse.cid
         ) {
             verifyLoginCallbackResponse(callbackResponse, context)
-            this.data.inBrowser = undefined;
+            this.data.inBrowser = undefined
 
             this.data.requestKey = requestKey
             this.data.privateKey = privateKey
@@ -278,7 +278,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
         const errorString = t('error.not_completed', {default: 'The request was not completed.'})
 
-        if(this.data.inBrowser && this.browserTransport) { 
+        if (this.data.inBrowser && this.browserTransport) {
             // Tell Wharf we need to prompt the user with a QR code and a button
             const promptPromise: Cancelable<PromptResponse> = context.ui.prompt({
                 title: t('transact.title', {default: 'Complete using WebAuth'}),
@@ -289,7 +289,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     {
                         type: 'countdown',
                         data: {
-                            label: t('transact.await', {default: 'Waiting for response from WebAuth'}),
+                            label: t('transact.await', {
+                                default: 'Waiting for response from WebAuth',
+                            }),
                             end: expiration.toISOString(),
                         },
                     },
@@ -309,10 +311,13 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             // Clear the timeout if the UI throws (which generally means it closed)
             promptPromise.catch(() => clearTimeout(timer))
 
-            const transactPromise = this.browserTransport.transact({ transaction: resolved.resolvedTransaction }, {
-                broadcast: false
-            });
-            
+            const transactPromise = this.browserTransport.transact(
+                {transaction: resolved.resolvedTransaction},
+                {
+                    broadcast: false,
+                }
+            )
+
             // Wait for either the callback or the prompt to resolve
             const callbackResponse = await Promise.race([transactPromise, promptPromise]).finally(
                 () => {
@@ -341,13 +346,12 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             }
             promptPromise.cancel(errorString)
         } else {
-
             // Create a new signing request based on the existing resolved request
             const modifiedRequest = await context.createRequest({transaction: resolved.transaction})
 
             // Add the callback to the request
             const callback = setTransactionCallback(modifiedRequest, this.buoyUrl)
-            
+
             const request = modifiedRequest.encode(true, false)
 
             const signManually = () => {
@@ -364,10 +368,14 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                         },
                         {
                             type: 'link',
-                            label: t('transact.sign_manually.link.title', {default: 'Open WebAuth'}),
+                            label: t('transact.sign_manually.link.title', {
+                                default: 'Open WebAuth',
+                            }),
                             data: {
                                 href: String(request),
-                                label: t('transact.sign_manually.link.title', {default: 'Open WebAuth'}),
+                                label: t('transact.sign_manually.link.title', {
+                                    default: 'Open WebAuth',
+                                }),
                             },
                         },
                     ],
@@ -385,13 +393,17 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     {
                         type: 'countdown',
                         data: {
-                            label: t('transact.await', {default: 'Waiting for response from WebAuth'}),
+                            label: t('transact.await', {
+                                default: 'Waiting for response from WebAuth',
+                            }),
                             end: expiration.toISOString(),
                         },
                     },
                     {
                         type: 'button',
-                        label: t('transact.label', {default: 'Sign manually or with another device'}),
+                        label: t('transact.label', {
+                            default: 'Sign manually or with another device',
+                        }),
                         data: {
                             href: modifiedRequest.encode(true, false, `${this.scheme}:`),
                             onClick: signManually,
@@ -426,7 +438,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
             // Wait for the callback from the wallet
             const callbackPromise = waitForCallback(callback, this.buoyWs, t)
-        
+
             // Assemble and send the payload to the wallet
             const service = new URL(this.data.channelUrl).origin
             const channel = new URL(this.data.channelUrl).pathname.substring(1)
@@ -460,9 +472,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     context.esrOptions
                 )
 
-                console.log('CBR', callbackResponse);
-                console.log('CBR Signed', extractSignaturesFromCallback(callbackResponse));
-                console.log('CBR resolved', resolvedRequest);
+                console.log('CBR', callbackResponse)
+                console.log('CBR Signed', extractSignaturesFromCallback(callbackResponse))
+                console.log('CBR resolved', resolvedRequest)
 
                 // Return the new request and the signatures from the wallet
                 return {
@@ -473,15 +485,15 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
             promptPromise.cancel(errorString)
         }
-        
-        // This shouldn't ever trigger, but just in case    
+
+        // This shouldn't ever trigger, but just in case
         throw new Error(errorString)
     }
 
     private async loginWithBrowser(callback: Deferred<inBrowserPayload>) {
-        if(this.browserTransport) {
+        if (this.browserTransport) {
             const data = await this.browserTransport.login()
-            callback.resolve(data);
+            callback.resolve(data)
         }
     }
 }

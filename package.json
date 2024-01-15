@@ -1,12 +1,12 @@
 {
-    "name": "@wharfkit/wallet-plugin-template",
-    "description": "A template to create wallet plugins for use with @wharfkit/session.",
+    "name": "@proton/wallet-plugin-webauth",
+    "description": "A WebAuth plugin for use with @wharfkit/session.",
     "version": "1.0.0",
-    "homepage": "https://github.com/wharfkit/wallet-plugin-template",
+    "homepage": "https://github.com/XPRNetwork/wallet-plugin-webauth",
     "license": "BSD-3-Clause",
-    "main": "lib/wallet-plugin-template.js",
-    "module": "lib/wallet-plugin-template.m.js",
-    "types": "lib/wallet-plugin-template.d.ts",
+    "main": "lib/wallet-plugin-webauth.js",
+    "module": "lib/wallet-plugin-webauth.m.js",
+    "types": "lib/wallet-plugin-webauth.d.ts",
     "sideEffects": false,
     "files": [
         "lib/*",
@@ -16,14 +16,18 @@
         "prepare": "make"
     },
     "dependencies": {
-        "tslib": "^2.1.0"
+        "@greymass/buoy": "^1.0.3",
+        "@wharfkit/protocol-esr": "^1.0.0-rc1",
+        "isomorphic-ws": "^5.0.0",
+        "tslib": "^2.1.0",
+        "ws": "^8.14.2"
     },
     "peerDependencies": {
         "@wharfkit/session": "^1.0.0"
     },
     "devDependencies": {
         "@rollup/plugin-alias": "^3.1.4",
-        "@rollup/plugin-commonjs": "^22.0.0",
+        "@rollup/plugin-commonjs": "^25.0.7",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^14.1.0",
         "@rollup/plugin-replace": "^5.0.1",

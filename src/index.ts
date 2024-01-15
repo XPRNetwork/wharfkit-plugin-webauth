@@ -7,6 +7,7 @@ import {
     Checksum256,
     LoginContext,
     Logo,
+    PackedTransaction,
     PermissionLevel,
     PrivateKey,
     PromptResponse,
@@ -14,6 +15,7 @@ import {
     ResolvedSigningRequest,
     Serializer,
     TransactContext,
+    Transaction,
     WalletPluginConfig,
     WalletPluginLoginResponse,
     WalletPluginMetadata,
@@ -319,14 +321,23 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 }
             )
 
-            console.log(callbackResponse);
-            if(('signatures' in callbackResponse) && (callbackResponse['signatures'].length > 0)) {
-                const signatures = extractSignaturesFromCallback({ sig: callbackResponse['signatures'][0] } as CallbackPayload);
-                console.log('return signatures', signatures)
-                return {
-                    signatures
-                }
+            if ('signatures' in callbackResponse && callbackResponse['signatures'].length > 0) {
+                const signatures = extractSignaturesFromCallback({
+                    sig: callbackResponse['signatures'][0],
+                } as CallbackPayload)
 
+                return {
+                    signatures,
+                    resolved: new ResolvedSigningRequest(
+                        resolved.request,
+                        PermissionLevel.from(callbackResponse.signer),
+                        PackedTransaction.from({
+                            packed_trx: callbackResponse.serializedTransaction,
+                        }).getTransaction(),
+                        callbackResponse.resolvedTransaction,
+                        resolved.chainId
+                    ),
+                }
             }
             promptPromise.cancel(errorString)
         } else {

@@ -1,4 +1,4 @@
-import {send} from '@greymass/buoy'
+import { send } from '@greymass/buoy'
 import {
     AbstractWalletPlugin,
     CallbackPayload,
@@ -15,7 +15,6 @@ import {
     ResolvedSigningRequest,
     Serializer,
     TransactContext,
-    Transaction,
     WalletPluginConfig,
     WalletPluginLoginResponse,
     WalletPluginMetadata,
@@ -29,12 +28,14 @@ import {
     setTransactionCallback,
     verifyLoginCallbackResponse,
     waitForCallback,
+    generateReturnUrl,
+    isAppleHandheld,
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import {createIdentityRequest, Deferred, getChainId} from './utils'
-import {BrowserTransport} from './browser'
-import {inBrowserPayload, isInBrowserPayload} from './types'
+import { createIdentityRequest, Deferred, getChainId } from './utils'
+import { BrowserTransport } from './browser'
+import { inBrowserPayload, isInBrowserPayload } from './types'
 
 import defaultTranslations from './translations'
 
@@ -131,7 +132,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
         const browserLogin = new Deferred<inBrowserPayload>()
 
         // Create the identity request to be presented to the user
-        const {callback, request, requestKey, privateKey} = await createIdentityRequest(
+        const {callback, request, sameDeviceRequest, requestKey, privateKey} = await createIdentityRequest(
             context,
             this.buoyUrl
         )
@@ -152,7 +153,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     type: 'link',
                     label: t('login.link', {default: 'Launch WebAuth'}),
                     data: {
-                        href: request.encode(true, false, `${this.scheme}:`),
+                        href: sameDeviceRequest.encode(true, false, `${this.scheme}:`),
                         label: t('login.link', {default: 'Launch WebAuth'}),
                         variant: 'primary',
                     },
@@ -224,6 +225,17 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 callbackResponse.link_key && PublicKey.from(callbackResponse.link_key)
             this.data.channelUrl = callbackResponse.link_ch
             this.data.channelName = callbackResponse.link_name
+
+            try {
+                if (callbackResponse.link_meta) {
+                    const metadata = JSON.parse(callbackResponse.link_meta)
+                    this.data.sameDevice = metadata.sameDevice
+                    this.data.launchUrl = metadata.launchUrl
+                    this.data.triggerUrl = metadata.triggerUrl
+                }
+            } catch (e) {
+                // console.log('Error processing link_meta', e)
+            }
 
             return {
                 chain: Checksum256.from(callbackResponse.cid),
@@ -354,6 +366,25 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
             const request = modifiedRequest.encode(true, false)
 
+            // Mobile will return true or false, desktop will return undefined
+            const isSameDevice = this.data.sameDevice !== false
+
+            // Same device request
+            const sameDeviceRequest = modifiedRequest.clone()
+            const returnUrl = generateReturnUrl()
+            sameDeviceRequest.setInfoKey('same_device', true)
+            sameDeviceRequest.setInfoKey('return_path', returnUrl)
+
+            if (this.data.sameDevice) {
+                if (this.data.sameDevice) {
+                    if (this.data.launchUrl) {
+                        window.location.href = this.data.launchUrl
+                    } else if (isAppleHandheld()) {
+                        window.location.href = `${this.scheme}://link`
+                    }
+                }
+            }
+
             const signManually = () => {
                 context.ui?.prompt({
                     title: t('transact.sign_manually.title', {default: 'Sign manually'}),
@@ -372,7 +403,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                                 default: 'Open WebAuth',
                             }),
                             data: {
-                                href: String(request),
+                                href: String(sameDeviceRequest),
                                 label: t('transact.sign_manually.link.title', {
                                     default: 'Open WebAuth',
                                 }),
@@ -405,8 +436,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                             default: 'Sign manually or with another device',
                         }),
                         data: {
-                            href: modifiedRequest.encode(true, false, `${this.scheme}:`),
-                            onClick: signManually,
+                            onClick: isSameDevice
+                                ? () => (window.location.href = sameDeviceRequest.encode())
+                                : signManually,
                             label: t('transact.label', {
                                 default: 'Sign manually or with another device',
                             }),
@@ -443,7 +475,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             const service = new URL(this.data.channelUrl).origin
             const channel = new URL(this.data.channelUrl).pathname.substring(1)
             const sealedMessage = sealMessage(
-                modifiedRequest.encode(true, false, `${this.scheme}:`),
+                (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(true, false, `${this.scheme}:`),
                 PrivateKey.from(this.data.privateKey),
                 PublicKey.from(this.data.signerKey)
             )
@@ -471,11 +503,6 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     callbackResponse,
                     context.esrOptions
                 )
-
-                console.log('CBR', callbackResponse)
-                console.log('CBR Signed', extractSignaturesFromCallback(callbackResponse))
-                console.log('CBR resolved', resolvedRequest)
-
                 // Return the new request and the signatures from the wallet
                 return {
                     signatures: extractSignaturesFromCallback(callbackResponse),

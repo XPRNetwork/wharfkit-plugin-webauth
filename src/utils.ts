@@ -1,5 +1,5 @@
 import { ReceiveOptions } from '@greymass/buoy';
-import { BuoySession, IdentityRequestResponse, getUserAgent, prepareCallback, uuid } from '@wharfkit/protocol-esr';
+import { BuoySession, IdentityRequestResponse, getUserAgent, prepareCallback, uuid, generateReturnUrl } from '@wharfkit/protocol-esr';
 import { Checksum256, LoginContext, PrivateKey, SigningRequest } from '@wharfkit/session';
 
 export function checkMultiChain(context: LoginContext,) {
@@ -61,12 +61,18 @@ export async function createIdentityRequest(
 
     request.setInfoKey('req_account', String(context.appName))
 
+    const sameDeviceRequest = request.clone()
+    const returnUrl = generateReturnUrl()
+    sameDeviceRequest.setInfoKey('same_device', true)
+    sameDeviceRequest.setInfoKey('return_path', returnUrl)
+
     // Return the request and the callback data
     return {
         callback: callbackChannel,
         request,
         requestKey,
         privateKey,
+        sameDeviceRequest
     }
 }
 

@@ -17,13 +17,12 @@
     },
     "dependencies": {
         "@greymass/buoy": "^1.0.3",
-        "@wharfkit/protocol-esr": "^1.0.0-rc1",
+        "@wharfkit/protocol-esr": "^1.2.1",
         "isomorphic-ws": "^5.0.0",
-        "tslib": "^2.1.0",
         "ws": "^8.14.2"
     },
     "peerDependencies": {
-        "@wharfkit/session": "^1.0.0"
+        "@wharfkit/session": "^1.2.5"
     },
     "devDependencies": {
         "@rollup/plugin-alias": "^3.1.4",
@@ -38,8 +37,8 @@
         "@types/node": "^18.7.18",
         "@typescript-eslint/eslint-plugin": "^5.20.0",
         "@typescript-eslint/parser": "^5.20.0",
-        "@wharfkit/mock-data": "^1.0.2",
-        "@wharfkit/session": "^1.0.0",
+        "@wharfkit/mock-data": "^1.2.0",
+        "@wharfkit/session": "^1.2.5",
         "chai": "^4.3.4",
         "eslint": "^8.13.0",
         "eslint-config-prettier": "^8.1.0",
@@ -54,6 +53,7 @@
         "rollup-plugin-terser": "^7.0.2",
         "ts-node": "^10.9.1",
         "tsconfig-paths": "^4.1.1",
+        "tslib": "^2.1.0",
         "typedoc": "^0.23.14",
         "typescript": "^4.1.2",
         "yarn-deduplicate": "^6.0.1"

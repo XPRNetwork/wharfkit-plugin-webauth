@@ -1,12 +1,12 @@
 {
-    "name": "@proton/wallet-plugin-webauth",
+    "name": "@proton/wharfkit-plugin-webauth",
     "description": "A WebAuth plugin for use with @wharfkit/session.",
     "version": "1.0.0",
-    "homepage": "https://github.com/XPRNetwork/wallet-plugin-webauth",
+    "homepage": "https://github.com/XPRNetwork/wharfkit-plugin-webauth",
     "license": "BSD-3-Clause",
-    "main": "lib/wallet-plugin-webauth.js",
-    "module": "lib/wallet-plugin-webauth.m.js",
-    "types": "lib/wallet-plugin-webauth.d.ts",
+    "main": "lib/wharfkit-plugin-webauth.js",
+    "module": "lib/wharfkit-plugin-webauth.m.js",
+    "types": "lib/wharfkit-plugin-webauth.d.ts",
     "sideEffects": false,
     "files": [
         "lib/*",

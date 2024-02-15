@@ -1,4 +1,4 @@
-# @proton/wallet-plugin-webauth
+# @proton/wharfkit-plugin-webauth
 
 A Session Kit wallet plugin for the [WebAuth](https://xprnetwork.org/wallet) wallet.
 
@@ -11,7 +11,7 @@ Mobile device and browser authentications are supported
 **NOTE**: This wallet plugin will only work with the SessionKit and requires a browser-based environment.
 
 ```ts
-import {WalletPluginWebAuth} from '@proton/wallet-plugin-webauth'
+import {WalletPluginWebAuth} from '@proton/wharfkit-plugin-webauth'
 
 const kit = new SessionKit({
     // ... your other options
@@ -23,7 +23,7 @@ Main and test networks are supported
 
 ```ts
 
-import {WalletPluginWebAuth} from '@proton/wallet-plugin-webauth'
+import {WalletPluginWebAuth} from '@proton/wharfkit-plugin-webauth'
 
 const kit = new SessionKit({
     // ... your other options
@@ -39,7 +39,7 @@ Custom buoy url and websocket class are supported.
 
 ```ts
 import WebSocket from 'isomorphic-ws'
-import {WalletPluginWebAuth} from '@proton/wallet-plugin-webauth'
+import {WalletPluginWebAuth} from '@proton/wharfkit-plugin-webauth'
 
 const kit = new SessionKit({
     // ... your other options

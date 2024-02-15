@@ -15,6 +15,9 @@
     "scripts": {
         "prepare": "make"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "dependencies": {
         "@greymass/buoy": "^1.0.3",
         "@wharfkit/protocol-esr": "^1.2.1",

@@ -2,9 +2,15 @@ import fs from 'fs'
 import dts from 'rollup-plugin-dts'
 import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json'
+import replace from '@rollup/plugin-replace'
 
 import pkg from './package.json'
+import json from '@rollup/plugin-json'
+
+const replaceVersion = replace({
+    preventAssignment: true,
+    __ver: pkg.version,
+})
 
 const name = pkg.name
 const license = fs.readFileSync('LICENSE').toString('utf-8').trim()
@@ -18,7 +24,7 @@ const banner = `
  */
 `.trim()
 
-const external = Object.keys(pkg.peerDependencies)
+const external = [...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)]
 
 /** @type {import('rollup').RollupOptions} */
 export default [
@@ -31,9 +37,9 @@ export default [
             sourcemap: true,
             exports: 'named',
         },
-        plugins: [typescript({target: 'es6'}), commonjs({
+        plugins: [replaceVersion, typescript({target: 'es6'}), commonjs({
             defaultIsModuleExports: false,
-        }),json()],
+        }), json()],
         external,
     },
     {
@@ -44,14 +50,14 @@ export default [
             format: 'esm',
             sourcemap: true,
         },
-        plugins: [typescript({target: 'es2020'}), commonjs({
+        plugins: [replaceVersion, typescript({target: 'es2020'}), commonjs({
             defaultIsModuleExports: false,
-        }),json()],
+        }), json()],
         external,
     },
     {
         input: 'src/index.ts',
         output: {banner, file: pkg.types, format: 'esm'},
-        plugins: [dts()],
+        plugins: [replaceVersion, dts()],
     },
 ]

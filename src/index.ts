@@ -1,4 +1,4 @@
-import { send } from '@greymass/buoy'
+import {send} from '@greymass/buoy'
 import {
     AbstractWalletPlugin,
     CallbackPayload,
@@ -33,9 +33,9 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import { createIdentityRequest, Deferred, getChainId } from './utils'
-import { BrowserTransport } from './browser'
-import { inBrowserPayload, isInBrowserPayload } from './types'
+import {createIdentityRequest, Deferred, getChainId} from './utils'
+import {BrowserTransport} from './browser'
+import {inBrowserPayload, isInBrowserPayload} from './types'
 
 import defaultTranslations from './translations'
 
@@ -133,10 +133,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
         const browserLogin = new Deferred<inBrowserPayload>()
 
         // Create the identity request to be presented to the user
-        const {callback, request, sameDeviceRequest, requestKey, privateKey} = await createIdentityRequest(
-            context,
-            this.buoyUrl
-        )
+        const {callback, request, sameDeviceRequest, requestKey, privateKey} =
+            await createIdentityRequest(context, this.buoyUrl)
 
         // Tell Wharf we need to prompt the user with a QR code and a button
         const promptResponse = context.ui?.prompt({
@@ -383,14 +381,14 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             const returnUrl = generateReturnUrl()
             sameDeviceRequest.setInfoKey('same_device', true)
             sameDeviceRequest.setInfoKey('return_path', returnUrl)
-            
+
             if (this.data.sameDevice) {
                 if (this.data.launchUrl) {
                     window.location.href = this.data.launchUrl
                 } else if (isAppleHandheld()) {
                     window.location.href = `${this.scheme}://link`
                 }
-            }            
+            }
 
             const signManually = () => {
                 context.ui?.prompt({
@@ -475,7 +473,11 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 const service = new URL(this.data.channelUrl).origin
                 const channel = new URL(this.data.channelUrl).pathname.substring(1)
                 const sealedMessage = sealMessage(
-                    (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(true, false, `${this.scheme}:`),
+                    (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(
+                        true,
+                        false,
+                        `${this.scheme}:`
+                    ),
                     PrivateKey.from(this.data.privateKey),
                     PublicKey.from(this.data.signerKey)
                 )
@@ -515,7 +517,9 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 }
             }
 
-            const errorString = t('error.not_completed', {default: 'The request was not completed.'})
+            const errorString = t('error.not_completed', {
+                default: 'The request was not completed.',
+            })
 
             promptPromise.cancel(errorString)
         }

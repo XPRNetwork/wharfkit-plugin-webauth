@@ -1,17 +1,24 @@
-import { ReceiveOptions } from '@greymass/buoy';
-import { BuoySession, IdentityRequestResponse, getUserAgent, prepareCallback, uuid, generateReturnUrl } from '@wharfkit/protocol-esr';
-import { Checksum256, LoginContext, PrivateKey, SigningRequest } from '@wharfkit/session';
+import {ReceiveOptions} from '@greymass/buoy'
+import {
+    BuoySession,
+    generateReturnUrl,
+    getUserAgent,
+    IdentityRequestResponse,
+    prepareCallback,
+    uuid,
+} from '@wharfkit/protocol-esr'
+import {Checksum256, LoginContext, PrivateKey, SigningRequest} from '@wharfkit/session'
 
-export function checkMultiChain(context: LoginContext,) {
-  return !(context.chain || context.chains.length === 1)
+export function checkMultiChain(context: LoginContext) {
+    return !(context.chain || context.chains.length === 1)
 }
 
 export function getChainId(context: LoginContext): Checksum256 | undefined {
-  if(checkMultiChain(context)) {
-    return context.chains[0].id;
-  } else {
-    return context.chain?.id;
-  }
+    if (checkMultiChain(context)) {
+        return context.chains[0].id
+    } else {
+        return context.chain?.id
+    }
 }
 
 /**
@@ -72,23 +79,22 @@ export async function createIdentityRequest(
         request,
         requestKey,
         privateKey,
-        sameDeviceRequest
+        sameDeviceRequest,
     }
 }
 
 export class Deferred<T> {
-  promise: Promise<T>
-  reject: any
-  resolve!: (value: T | PromiseLike<T>) => void;
+    promise: Promise<T>
+    reject: any
+    resolve!: (value: T | PromiseLike<T>) => void
 
-  constructor() {
-    this.promise = new Promise<T>((resolve, reject) => {
-      this.reject = reject
-      this.resolve = resolve
-    })
-  }
+    constructor() {
+        this.promise = new Promise<T>((resolve, reject) => {
+            this.reject = reject
+            this.resolve = resolve
+        })
+    }
 }
-
 
 function prepareCallbackChannel(buoyUrl): ReceiveOptions {
     return {

@@ -22,14 +22,14 @@ import {
 } from '@wharfkit/session'
 import {
     extractSignaturesFromCallback,
+    generateReturnUrl,
+    isAppleHandheld,
     isCallback,
     LinkInfo,
     sealMessage,
     setTransactionCallback,
     verifyLoginCallbackResponse,
     waitForCallback,
-    generateReturnUrl,
-    isAppleHandheld,
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
@@ -127,6 +127,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             throw new Error('No UI available')
         }
 
+        // Retrieve translation helper from the UI, passing the app ID
         const t = context.ui.getTranslate(this.id)
 
         const browserLogin = new Deferred<inBrowserPayload>()
@@ -361,6 +362,14 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             // Create a new signing request based on the existing resolved request
             const modifiedRequest = await context.createRequest({transaction: resolved.transaction})
 
+            // Set the expiration on the request LinkInfo
+            modifiedRequest.setInfoKey(
+                'link',
+                LinkInfo.from({
+                    expiration,
+                })
+            )
+
             // Add the callback to the request
             const callback = setTransactionCallback(modifiedRequest, this.buoyUrl)
 
@@ -374,16 +383,14 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             const returnUrl = generateReturnUrl()
             sameDeviceRequest.setInfoKey('same_device', true)
             sameDeviceRequest.setInfoKey('return_path', returnUrl)
-
+            
             if (this.data.sameDevice) {
-                if (this.data.sameDevice) {
-                    if (this.data.launchUrl) {
-                        window.location.href = this.data.launchUrl
-                    } else if (isAppleHandheld()) {
-                        window.location.href = `${this.scheme}://link`
-                    }
+                if (this.data.launchUrl) {
+                    window.location.href = this.data.launchUrl
+                } else if (isAppleHandheld()) {
+                    window.location.href = `${this.scheme}://link`
                 }
-            }
+            }            
 
             const signManually = () => {
                 context.ui?.prompt({
@@ -460,30 +467,27 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             // Clear the timeout if the UI throws (which generally means it closed)
             promptPromise.catch(() => clearTimeout(timer))
 
-            // Set the expiration on the request LinkInfo
-            modifiedRequest.setInfoKey(
-                'link',
-                LinkInfo.from({
-                    expiration,
-                })
-            )
-
             // Wait for the callback from the wallet
             const callbackPromise = waitForCallback(callback, this.buoyWs, t)
 
             // Assemble and send the payload to the wallet
-            const service = new URL(this.data.channelUrl).origin
-            const channel = new URL(this.data.channelUrl).pathname.substring(1)
-            const sealedMessage = sealMessage(
-                (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(true, false, `${this.scheme}:`),
-                PrivateKey.from(this.data.privateKey),
-                PublicKey.from(this.data.signerKey)
-            )
+            if (this.data.channelUrl) {
+                const service = new URL(this.data.channelUrl).origin
+                const channel = new URL(this.data.channelUrl).pathname.substring(1)
+                const sealedMessage = sealMessage(
+                    (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(true, false, `${this.scheme}:`),
+                    PrivateKey.from(this.data.privateKey),
+                    PublicKey.from(this.data.signerKey)
+                )
 
-            send(Serializer.encode({object: sealedMessage}).array, {
-                service,
-                channel,
-            })
+                send(Serializer.encode({object: sealedMessage}).array, {
+                    service,
+                    channel,
+                })
+            } else {
+                // If no channel is defined, fallback to the same device request and trigger immediately
+                window.location.href = sameDeviceRequest.encode()
+            }
 
             // Wait for either the callback or the prompt to resolve
             const callbackResponse = await Promise.race([callbackPromise, promptPromise]).finally(
@@ -503,12 +507,15 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                     callbackResponse,
                     context.esrOptions
                 )
+
                 // Return the new request and the signatures from the wallet
                 return {
                     signatures: extractSignaturesFromCallback(callbackResponse),
                     resolved: resolvedRequest,
                 }
             }
+
+            const errorString = t('error.not_completed', {default: 'The request was not completed.'})
 
             promptPromise.cancel(errorString)
         }

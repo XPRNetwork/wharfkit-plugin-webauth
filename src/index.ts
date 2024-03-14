@@ -374,7 +374,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             const request = modifiedRequest.encode(true, false, `${this.scheme}:`)
 
             // Mobile will return true or false, desktop will return undefined
-            const isSameDevice = this.data.sameDevice !== false
+            const isSameDevice = this.data.sameDevice === true
 
             // Same device request
             const sameDeviceRequest = modifiedRequest.clone()

@@ -33,7 +33,7 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import {createIdentityRequest, Deferred, getChainId} from './utils'
+import {createIdentityRequest, Deferred, getChainId, isAndroid} from './utils'
 import {BrowserTransport} from './browser'
 import {inBrowserPayload, isInBrowserPayload} from './types'
 
@@ -374,7 +374,8 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             const request = modifiedRequest.encode(true, false, `${this.scheme}:`)
 
             // Mobile will return true or false, desktop will return undefined
-            const isSameDevice = this.data.sameDevice === true
+            const isSameDevice =
+                isAppleHandheld() || isAndroid() ? true : this.data.sameDevice === true
 
             // Same device request
             const sameDeviceRequest = modifiedRequest.clone()

@@ -102,3 +102,7 @@ function prepareCallbackChannel(buoyUrl): ReceiveOptions {
         channel: uuid(),
     }
 }
+
+export function isAndroid(): boolean {
+    return /Android/.test(navigator.userAgent)
+}

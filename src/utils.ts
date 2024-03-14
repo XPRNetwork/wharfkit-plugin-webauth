@@ -119,12 +119,17 @@ export function fixAndroidUrl(url: string): string {
     return url.replace(/^android-intent:/, 'android-app:')
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const isNativeApp = () => !!window.ReactNativeWebView
+export function isReactNativeApp() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return !!window.ReactNativeWebView
+}
 
 export function isAndroidWebView() {
-    return /wv/.test(navigator.userAgent) || (/Android/.test(navigator.userAgent) && isNativeApp())
+    return (
+        /wv/.test(navigator.userAgent) ||
+        (/Android/.test(navigator.userAgent) && isReactNativeApp())
+    )
 }
 
 export function isChromeMobile() {

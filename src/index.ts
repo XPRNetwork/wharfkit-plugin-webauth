@@ -33,7 +33,7 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import {createIdentityRequest, Deferred, getChainId, isAndroid} from './utils'
+import {createIdentityRequest, Deferred, fixAndroidUrl, getChainId, isAndroid} from './utils'
 import {BrowserTransport} from './browser'
 import {inBrowserPayload, isInBrowserPayload} from './types'
 
@@ -379,7 +379,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
 
             // Same device request
             const sameDeviceRequest = modifiedRequest.clone()
-            const returnUrl = generateReturnUrl()
+            const returnUrl = fixAndroidUrl(generateReturnUrl())
             sameDeviceRequest.setInfoKey('same_device', true)
             sameDeviceRequest.setInfoKey('return_path', returnUrl)
 

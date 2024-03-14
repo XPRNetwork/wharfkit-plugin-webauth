@@ -69,7 +69,7 @@ export async function createIdentityRequest(
     request.setInfoKey('req_account', String(context.appName))
 
     const sameDeviceRequest = request.clone()
-    const returnUrl = generateReturnUrl()
+    const returnUrl = fixAndroidUrl(generateReturnUrl())
     sameDeviceRequest.setInfoKey('same_device', true)
     sameDeviceRequest.setInfoKey('return_path', returnUrl)
 
@@ -101,4 +101,37 @@ function prepareCallbackChannel(buoyUrl): ReceiveOptions {
         service: buoyUrl,
         channel: uuid(),
     }
+}
+
+export function isAndroid(): boolean {
+    return /Android/.test(navigator.userAgent)
+}
+
+export function fixAndroidUrl(url: string): string {
+    if (url === 'android-intent://webview') {
+        if (isAndroid() && isAndroidWebView()) {
+            return 'android-app://webview'
+        }
+        if (isAndroid() && isChromeMobile()) {
+            return 'android-app://com.android.chrome'
+        }
+    }
+    return url.replace(/^android-intent:/, 'android-app:')
+}
+
+export function isReactNativeApp() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return !!window.ReactNativeWebView
+}
+
+export function isAndroidWebView() {
+    return (
+        /wv/.test(navigator.userAgent) ||
+        (/Android/.test(navigator.userAgent) && isReactNativeApp())
+    )
+}
+
+export function isChromeMobile() {
+    return /Chrome\/[.0-9]* Mobile/i.test(navigator.userAgent)
 }

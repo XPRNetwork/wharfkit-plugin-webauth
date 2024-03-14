@@ -33,7 +33,7 @@ import {
 } from '@wharfkit/protocol-esr'
 
 import WebSocket from 'isomorphic-ws'
-import {createIdentityRequest, Deferred, getChainId} from './utils'
+import {createIdentityRequest, Deferred, fixAndroidUrl, getChainId, isAndroid} from './utils'
 import {BrowserTransport} from './browser'
 import {inBrowserPayload, isInBrowserPayload} from './types'
 
@@ -371,14 +371,15 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             // Add the callback to the request
             const callback = setTransactionCallback(modifiedRequest, this.buoyUrl)
 
-            const request = modifiedRequest.encode(true, false)
+            const request = modifiedRequest.encode(true, false, `${this.scheme}:`)
 
             // Mobile will return true or false, desktop will return undefined
-            const isSameDevice = this.data.sameDevice !== false
+            const isSameDevice =
+                isAppleHandheld() || isAndroid() ? true : this.data.sameDevice === true
 
             // Same device request
             const sameDeviceRequest = modifiedRequest.clone()
-            const returnUrl = generateReturnUrl()
+            const returnUrl = fixAndroidUrl(generateReturnUrl())
             sameDeviceRequest.setInfoKey('same_device', true)
             sameDeviceRequest.setInfoKey('return_path', returnUrl)
 
@@ -442,7 +443,12 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                         }),
                         data: {
                             onClick: isSameDevice
-                                ? () => (window.location.href = sameDeviceRequest.encode())
+                                ? () =>
+                                      (window.location.href = sameDeviceRequest.encode(
+                                          true,
+                                          true,
+                                          `${this.scheme}:`
+                                      ))
                                 : signManually,
                             label: t('transact.label', {
                                 default: 'Sign manually or with another device',
@@ -488,7 +494,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
                 })
             } else {
                 // If no channel is defined, fallback to the same device request and trigger immediately
-                window.location.href = sameDeviceRequest.encode()
+                window.location.href = sameDeviceRequest.encode(true, true, `${this.scheme}:`)
             }
 
             // Wait for either the callback or the prompt to resolve

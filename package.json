@@ -21,7 +21,7 @@
     "dependencies": {
         "@greymass/buoy": "^1.0.3",
         "@wharfkit/antelope": "^1.0.5",
-        "@wharfkit/protocol-esr": "^1.3.0",
+        "@wharfkit/protocol-esr": "^1.3.2",
         "isomorphic-ws": "^5.0.0",
         "ws": "^8.14.2"
     },
@@ -50,7 +50,7 @@
         "eslint": "^8.13.0",
         "eslint-config-prettier": "^8.1.0",
         "eslint-plugin-prettier": "^4.0.0",
-        "gh-pages": "^4.0.0",
+        "gh-pages": "^5.0.0",
         "mocha": "^10.0.0",
         "node-fetch": "^2.6.1",
         "nyc": "^15.1.0",

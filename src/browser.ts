@@ -49,13 +49,22 @@ export class BrowserTransport {
     }
 
     public set childWindow(window: Window | null) {
-        _childWindow = window
+        if (_childWindow !== window) {
+            _childWindow = window
+            if (!_childWindow && this.closeCheckInterval) {
+                clearInterval(this.closeCheckInterval)
+            }
+            if (_childWindow) {
+                this.closeCheckInterval = setInterval(() => this.checkChildWindowClosed(), 500)
+            }
+        }
     }
+
+    private closeCheckInterval: NodeJS.Timeout | null = null
 
     constructor(options: {scheme: string} = {scheme: 'proton'}) {
         this.scheme = options.scheme
 
-        setInterval(() => this.closeChild(), 500)
         if (typeof window !== 'undefined') {
             window.addEventListener('message', (event) => this.onEvent(event), false)
         }
@@ -67,21 +76,21 @@ export class BrowserTransport {
         return `${base}${path}`
     }
 
-    closeChild(force = false) {
+    closeChild() {
         if (this.childWindow) {
-            if (force) {
+            if (this.closeCheckInterval) {
+                clearInterval(this.closeCheckInterval)
+            }
+            if (!this.childWindow.closed) {
                 this.childWindow.close()
             }
-
-            if (force || this.childWindow.closed) {
-                this.childWindow = null
-            }
+            this.childWindow = null
         }
     }
 
     async login() {
         if (this.deferredTransact) {
-            this.closeChild(true)
+            this.closeChild()
             this.deferredTransact.deferral.reject('Trying to login')
             this.deferredTransact = undefined
         }
@@ -106,7 +115,7 @@ export class BrowserTransport {
 
     async transact(args: any /*TransactArgs*/, options?: any /*TransactOptions*/): Promise<any> {
         if (this.deferredLogin) {
-            this.closeChild(true)
+            this.closeChild()
             this.deferredLogin.reject('Trying to login')
             this.deferredLogin = undefined
         }
@@ -169,7 +178,7 @@ export class BrowserTransport {
             }
             // Close child
             else if (type === 'close') {
-                this.closeChild(true)
+                this.closeChild()
 
                 if (this.deferredTransact) {
                     this.deferredTransact.deferral.reject('Closed')
@@ -179,7 +188,7 @@ export class BrowserTransport {
             }
             // TX Success
             else if (type === 'transactionSuccess') {
-                this.closeChild(true)
+                this.closeChild()
 
                 if (this.deferredTransact) {
                     if (error) {
@@ -194,7 +203,7 @@ export class BrowserTransport {
             }
             // Login success
             else if (type === 'loginSuccess') {
-                this.closeChild(true)
+                this.closeChild()
 
                 if (this.deferredLogin) {
                     this.deferredLogin.resolve(data)
@@ -204,6 +213,19 @@ export class BrowserTransport {
         } catch (e) {
             // eslint-disable-next-line no-console
             console.error(e)
+        }
+    }
+
+    private checkChildWindowClosed() {
+        if (this.childWindow && this.childWindow.closed) {
+            if (typeof window !== 'undefined') {
+                window.postMessage(
+                    JSON.stringify({
+                        type: 'close',
+                    }),
+                    '*'
+                )
+            }
         }
     }
 }

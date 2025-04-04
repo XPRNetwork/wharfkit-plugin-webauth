@@ -1,7 +1,7 @@
 {
     "name": "@proton/wharfkit-plugin-webauth",
     "description": "A WebAuth plugin for use with @wharfkit/session.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "homepage": "https://github.com/XPRNetwork/wharfkit-plugin-webauth",
     "license": "BSD-3-Clause",
     "main": "lib/wharfkit-plugin-webauth.js",

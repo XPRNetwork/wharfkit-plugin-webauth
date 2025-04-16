@@ -13,7 +13,7 @@ const sessionKit = new SessionKit({
   chains: [
     {
       id: "71ee83bcf52142d61019d95f9cc5427ba6a0d7ff8accd9e2088ae2abeaf3d3dd",
-      url: "https://testnet-rpc.api.protondex.com",
+      url: "https://rpc.api.testnet.metalx.com",
     },
   ],
   ui: webRenderer,

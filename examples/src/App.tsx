@@ -5,6 +5,7 @@ import './App.css'
 import WebRenderer from '@wharfkit/web-renderer';
 import SessionKit, { Session } from '@wharfkit/session';
 import { WalletPluginWebAuth } from "../../"
+// import { WalletPluginWebAuth } from "@proton/wharfkit-plugin-webauth"
 
 const webRenderer = new WebRenderer()
 

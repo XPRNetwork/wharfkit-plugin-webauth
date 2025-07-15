@@ -107,7 +107,10 @@ export function isAndroid(): boolean {
     return /Android/.test(navigator.userAgent)
 }
 
-export function fixAndroidUrl(url: string): string {
+export function fixAndroidUrl(url?: string): string {
+    if (!url) {
+        return ''
+    }
     if (url === 'android-intent://webview') {
         if (isAndroid() && isAndroidWebView()) {
             return 'android-app://webview'

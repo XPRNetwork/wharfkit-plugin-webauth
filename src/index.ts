@@ -478,7 +478,7 @@ export class WalletPluginWebAuth extends AbstractWalletPlugin {
             if (this.data.channelUrl) {
                 const service = new URL(this.data.channelUrl).origin
                 const channel = new URL(this.data.channelUrl).pathname.substring(1)
-                const sealedMessage = sealMessage(
+                const sealedMessage = await sealMessage(
                     (this.data.sameDevice ? sameDeviceRequest : modifiedRequest).encode(
                         true,
                         false,
